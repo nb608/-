@@ -1,6 +1,55 @@
 # 数模代码汇总
-## 时间序列预测
-### LSTM
+## 分类
+### 无监督分类
+#### k-means聚类
+···python
+import numpy as np  
+from sklearn.datasets import make_blobs  
+from sklearn.preprocessing import StandardScaler  
+from sklearn.cluster import KMeans  
+import matplotlib.pyplot as plt  
+
+# 生成模拟数据
+X, y_true = make_blobs(n_samples=300, centers=5, cluster_std=0.50, random_state=12345)  
+
+# 数据标准化  
+scaler = StandardScaler()  
+x = scaler.fit_transform(X)  
+
+# 肘部法则确定K值  
+SSE = []  # Store the sum of squared errors for each k  
+for k in range(1, 10):  
+    estimator = KMeans(n_clusters=k, random_state=0)  # Construct the clustering estimator  
+    estimator.fit(x)  # Perform k-means clustering  
+    SSE.append(estimator.inertia_)  
+plt.figure(figsize=(8, 4))  
+plt.plot(range(1, 10), SSE, 'o-')  
+plt.xlabel('Number of clusters (k)')  
+plt.ylabel('SSE')  
+plt.title('Elbow Method Showing Optimal k')  
+plt.grid(True)  
+plt.show()  
+
+# 使用确定的K值进行聚类
+optimal_k = 3  #肘部法得出的k值
+kmeans = KMeans(n_clusters=optimal_k, random_state=0)  
+kmeans.fit(x)  
+labels = kmeans.labels_  
+centroids = kmeans.cluster_centers_  
+
+# 显示图形
+plt.figure(figsize=(8, 6))  
+plt.scatter(x[:, 0], x[:, 1], c=labels, s=50, cmap='viridis', alpha=0.6, edgecolor='w')  
+plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=200, alpha=0.75, marker='X')  # Centroids  
+plt.title('Clusters and Centroids')  
+plt.xlabel('Feature 1 (Standardized)')  
+plt.ylabel('Feature 2 (Standardized)')  
+plt.grid(True)  
+plt.show()
+···
+## 预测
+### 时间序列预测
+#### LSTM
 ```python
 import numpy as np
 import pandas as pd
@@ -113,12 +162,12 @@ plt.xlabel('时间')
 plt.ylabel('销售额（千克）')
 plt.show()
 ```
-### ARIMA
+#### ARIMA
 ```python
 
 
 ```
-### SARIMA
+#### SARIMA
 ```python
 
 ```
