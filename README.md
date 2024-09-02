@@ -11,11 +11,12 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, r2_score
 
 
-# 读取数据
+#读取数据
 data1 = pd.read_csv('分类日销量统计结果.csv')
 
-# 确保时间列是datetime类型
+#确保时间列是datetime类型
 data1['销售日期'] = pd.to_datetime(data1['销售日期'])
+'''
 
 # 提取年和月
 data1['销售日期'] = data1['销售日期'].dt.to_period('D')
@@ -38,14 +39,14 @@ def create_dataset(dataset, steps):
 df = pd.DataFrame(data)
 df = df[['销售日期', '销量(千克)']]
 df.set_index('销售日期', inplace=True)
-# 将销售额数据转换为numpy数组
+#将销售额数据转换为numpy数组
 dataset = df.values.astype('float32')
 
-# 归一化数据到0~1之间
+#归一化数据到0~1之间
 scaler = MinMaxScaler(feature_range=(0, 1))
 dataset = scaler.fit_transform(dataset)
 
-# 划分训练集和测试集
+#划分训练集和测试集
 steps = 30  #设置时间步长
 train_size = int(len(dataset)*0.8)  #划分训练集
 test_size = len(dataset) - train_size
@@ -57,7 +58,7 @@ trainX, trainY = create_dataset(train, steps)
 testX, testY = create_dataset(test, steps)
 
 
-# 创建LSTM模型
+#创建LSTM模型
 model = Sequential()
 model.add(LSTM(10, input_shape=(trainX.shape[1], trainX.shape[2])))
 
@@ -65,18 +66,18 @@ model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(trainX, trainY, epochs=300, batch_size=4)
 
-# 预测
+#预测
 trainPredict = model.predict(trainX)
 testPredict = model.predict(testX)
-# 计算得分
+#计算得分
 trainScore = math.sqrt(mean_squared_error(trainY, trainPredict))
 print('Train Score: %.2f RMSE' % (trainScore))
 testScore = math.sqrt(mean_squared_error(testY, testPredict))
 print('Test Score: %.2f RMSE' % (testScore))
-# 计算R方
+#计算R方
 train_r2 = r2_score(trainY, trainPredict)
 test_r2 = r2_score(testY, testPredict)
-# 反归一化
+#反归一化
 trainPredict = scaler.inverse_transform(trainPredict)
 trainY = scaler.inverse_transform(trainY.reshape(-1, 1))
 testPredict = scaler.inverse_transform(testPredict)
@@ -85,7 +86,7 @@ print('Train R2: %.2f' % train_r2)
 print('Test R2: %.2f' % test_r2)
 
 
-# 绘图
+#绘图
 trainPredictPlot = np.empty_like(dataset)
 trainPredictPlot[:, :] = np.nan
 trainPredictPlot[steps:len(trainPredict) + steps, :] = trainPredict
@@ -93,15 +94,15 @@ trainPredictPlot[steps:len(trainPredict) + steps, :] = trainPredict
 testPredictPlot = np.empty_like(dataset)
 testPredictPlot[:, :] = np.nan
 
-# 确保testPredict插入的位置是合理的
+#确保testPredict插入的位置是合理的
 test_start = len(trainPredict) + steps
 test_end = test_start + len(testPredict)
 
-# 输出尺寸调试信息
+#输出尺寸调试信息
 print("TestPredict shape:", testPredict.shape)
 print("Expected slice size:", test_end - test_start)
 
-# 确保插入的部分与testPredict尺寸一致
+#确保插入的部分与testPredict尺寸一致
 testPredictPlot[test_start:test_end, :] = testPredict
 
 plt.plot(scaler.inverse_transform(dataset))
