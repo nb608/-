@@ -1,6 +1,6 @@
 ## 时间序列预测
 ### LSTM
-'''python
+```python
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ data1 = pd.read_csv('分类日销量统计结果.csv')
 
 #确保时间列是datetime类型
 data1['销售日期'] = pd.to_datetime(data1['销售日期'])
-'''
+```
 
 # 提取年和月
 data1['销售日期'] = data1['销售日期'].dt.to_period('D')
