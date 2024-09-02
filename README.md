@@ -2,7 +2,7 @@
 ## 分类
 ### 无监督分类
 #### k-means聚类
-···python
+```python
 import numpy as np  
 from sklearn.datasets import make_blobs  
 from sklearn.preprocessing import StandardScaler  
@@ -46,7 +46,7 @@ plt.xlabel('Feature 1 (Standardized)')
 plt.ylabel('Feature 2 (Standardized)')  
 plt.grid(True)  
 plt.show()
-···
+```
 ## 预测
 ### 时间序列预测
 #### LSTM
