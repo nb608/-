@@ -16,7 +16,6 @@ data1 = pd.read_csv('分类日销量统计结果.csv')
 
 #确保时间列是datetime类型
 data1['销售日期'] = pd.to_datetime(data1['销售日期'])
-```
 
 # 提取年和月
 data1['销售日期'] = data1['销售日期'].dt.to_period('D')
@@ -112,19 +111,19 @@ plt.title('预测与真实销售额')
 plt.xlabel('时间')
 plt.ylabel('销售额（千克）')
 plt.show()
-'''
+```
 ### ARIMA
-'''python
+```python
 
 
-'''
+```
 ### SARIMA
-'''python
+```python
 
-'''
+```
 ## 相关度分析
 ### perason相关系数
-'''python
+```python
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -145,10 +144,28 @@ plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
 plt.title('Pearson Correlation Coefficient Heatmap')
 plt.show()
-'''
+```
 ### spearman相关系数
-'''python
+```python
 import pandas as pd
-# 计算斯皮尔曼相关系数矩阵
-spearman_corr = pivot_data.corr(method='spearman')
-'''
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# 从Excel文件中读取数据
+file_path = 'your_file.xlsx'  # 替换为你的Excel文件路径
+sheet_name = 'Sheet1'  # 替换为你的工作表名称
+data = pd.read_excel(file_path, sheet_name=sheet_name)
+
+# 计算皮尔逊相关系数矩阵
+correlation_matrix = data.corr(method='spearman')
+
+# 设置绘图风格
+sns.set(style='white')
+
+# 绘制热力图
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+plt.title('Pearson Correlation Coefficient Heatmap')
+plt.show()
+
+```
