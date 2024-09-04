@@ -171,7 +171,150 @@ print('混淆矩阵:', conf_matrix)
 
 ### 无监督分类
 
-#### k-means聚类
+
+
+#### Q聚类（对指标聚类）
+##### 层次聚类
+```python
+# 综合分类数据集
+import numpy as np
+from sklearn import metrics
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.datasets import make_blobs
+from matplotlib import pyplot as plt
+
+# 创建数据集
+# X为样本特征，Y为样本簇类别， 共1000个样本，每个样本2个特征，共4个簇，
+# 簇中心在[-1,-1], [0,0],[1,1], [2,2]， 簇方差分别为[0.4, 0.2, 0.2, 0.2]
+X, y = make_blobs(n_samples=1000, n_features=2,
+                  centers=[[-1, -1], [0, 0], [1, 1], [2, 2]],
+                  cluster_std=[0.4, 0.3, 0.2, 0.1],
+                  random_state=9)
+# 数据可视化
+plt.scatter(X[:, 0], X[:, 1], marker='o')
+plt.show()
+
+# 定义颜色列表
+colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#00FFFF', '#FF00FF', '#800080']
+
+for index, metric in enumerate(["cosine", "euclidean", "cityblock"]):
+    model = AgglomerativeClustering(
+        n_clusters=4, linkage="average", metric=metric
+    )
+    model.fit(X)
+    print("%s Silhouette Coefficient: %0.3f"
+          % (metric, metrics.silhouette_score(X, model.labels_, metric='sqeuclidean')))
+
+    plt.figure()
+    plt.axes([0, 0, 1, 1])
+    for l, c in zip(np.arange(model.n_clusters), colors[:model.n_clusters]):
+        row_ix = np.where(l == model.labels_)
+        plt.scatter(X[row_ix, 0], X[row_ix, 1], c=c)
+    plt.axis("tight")
+    plt.axis("off")
+    plt.suptitle("AgglomerativeClustering(affinity=%s)" % metric, size=20)
+
+plt.show()
+
+
+import scipy.cluster.hierarchy as shc
+
+plt.figure(figsize =(8, 8))
+plt.title('Visualising the data')
+Dendrogram = shc.dendrogram((shc.linkage(X, method ='ward')))
+plt.show()
+
+```
+#### R聚类（） 
+##### DBSCAN（凸和非凸数据集）
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
+from sklearn import metrics
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+
+# 设置matplotlib支持中文显示
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 用黑体显示中文
+plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
+
+# 生成样本数据
+centers = [[1, 1], [-1, -1], [1, -1]]
+X, labels_true = make_blobs(n_samples=750, centers=centers, cluster_std=0.4,
+                            random_state=0)
+
+X = StandardScaler().fit_transform(X)
+
+# 计算k-距离图
+min_samples = 10
+k_distances = []
+for i in range(len(X)):
+    distances = np.linalg.norm(X - X[i], axis=1)
+    distances = np.sort(distances)
+    k_distance = distances[min_samples - 1]  # 第min_samples个最近邻的距离
+    k_distances.append(k_distance)
+
+# 排序k-距离
+sorted_k_distances = sorted(k_distances)
+
+# 使用选定的eps值计算DBSCAN
+eps = 0.3  # 从k-距离图中选择的eps值
+db = DBSCAN(eps=eps, min_samples=min_samples).fit(X)
+core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+core_samples_mask[db.core_sample_indices_] = True
+labels = db.labels_
+
+# 计算标签中的聚类数量，忽略噪声点
+n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+n_noise_ = list(labels).count(-1)
+
+print('估计的聚类数量: %d' % n_clusters_)
+print('估计的噪声点数量: %d' % n_noise_)
+print("同质性: %0.3f" % metrics.homogeneity_score(labels_true, labels))
+print("完整性: %0.3f" % metrics.completeness_score(labels_true, labels))
+print("V-测量: %0.3f" % metrics.v_measure_score(labels_true, labels))
+print("调整后的Rand指数: %0.3f"
+      % metrics.adjusted_rand_score(labels_true, labels))
+print("调整后的互信息: %0.3f"
+      % metrics.adjusted_mutual_info_score(labels_true, labels))
+print("轮廓系数: %0.3f"
+      % metrics.silhouette_score(X, labels))
+
+# 创建画布
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+# 绘制k-距离图
+ax1.plot(range(1, len(sorted_k_distances) + 1), sorted_k_distances, marker='o')
+ax1.set_xlabel('数据点索引')
+ax1.set_ylabel('k-距离')
+ax1.set_title('K-距离图')
+ax1.grid(True)
+
+# 绘制聚类结果
+# 黑色用于表示噪声点
+unique_labels = set(labels)
+colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#00FFFF', '#FF00FF', '#800080']  # 自定义颜色列表
+colors = colors[:len(unique_labels)]  # 确保颜色列表长度与聚类数量一致
+for k, col in zip(unique_labels, colors):
+    if k == -1:
+        # 黑色用于噪声点
+        col = 'black'
+
+    class_member_mask = (labels == k)
+
+    # 核心样本
+    xy = X[class_member_mask & core_samples_mask]
+    ax2.scatter(xy[:, 0], xy[:, 1], c=col, edgecolors='k', s=100, marker='s')  # 使用正方形标记
+
+    # 非核心样本
+    xy = X[class_member_mask & ~core_samples_mask]
+    ax2.scatter(xy[:, 0], xy[:, 1], c=col, edgecolors='k', s=60, marker='o')  # 使用圆形标记
+
+ax2.set_title('估计的聚类数量: %d' % n_clusters_)
+plt.tight_layout()  # 调整子图间距
+plt.show()
+
+##### k-means聚类（凸数据集）
 ```python
 import numpy as np  
 from sklearn.datasets import make_blobs  
