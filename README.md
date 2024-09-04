@@ -1,5 +1,168 @@
 # 数模代码汇总
 ## 分类
+### 有监督分类
+#### SVM
+```python
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, f1_score, classification_report
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+ # 设置随机种子以获得可重现的结果
+np.random.seed(42)
+ # 生成红色点和蓝色点
+n_red = 100
+n_blue = 100
+ # 红色点围绕(0, 0)生成
+red_x = np.random.randn(n_red, 1) - 2
+red_y = np.random.randn(n_red, 1)
+X_red = np.concatenate((red_x, red_y), axis=1)
+y_red = np.zeros(n_red)
+ # 蓝色点围绕(4, 4)生成
+blue_x = np.random.randn(n_blue, 1) + 2
+blue_y = np.random.randn(n_blue, 1)
+X_blue = np.concatenate((blue_x, blue_y), axis=1)
+y_blue = np.ones(n_blue)
+ # 合并数据点
+X = np.vstack((X_red, X_blue))
+y = np.concatenate((y_red, y_blue))
+ # 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+ # 创建SVM分类器
+svm_classifier = SVC(kernel='linear', C=3)
+ # 训练模型
+svm_classifier.fit(X_train, y_train)
+ # 预测测试集
+y_pred = svm_classifier.predict(X_test)
+ # 计算评价指标
+accuracy = accuracy_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred, average='binary')  # 二分类问题使用binary
+
+ # 打印评价指标
+print(f'准确率: {accuracy:.2f}')
+print(f'F1分数: {f1:.2f}')
+ # 打印分类报告
+print(classification_report(y_test, y_pred))
+ # 可视化结果
+h = .02  # mesh的步长
+# 创建颜色映射
+cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA'])
+cmap_bold = ListedColormap(['#FF0000', '#00FF00'])
+ # 绘制决策边界
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+np.arange(y_min, y_max, h))
+Z = svm_classifier.predict(np.c_[xx.ravel(), yy.ravel()])
+ # 把结果放入一个彩色图
+Z = Z.reshape(xx.shape)
+plt.figure()
+plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
+ # 绘制训练集和测试集
+plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=cmap_bold, edgecolor='k', s=50)
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap=cmap_bold, alpha=0.6, edgecolor='k', s=50)
+ # 绘制预测结果
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_pred, cmap=cmap_bold, marker='x',
+edgecolor='k', s=50)
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
+plt.title("2-Class classification (SVM)")
+plt.show()
+```
+#### 随机森林
+```python
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, f1_score
+ # 创建一个模拟的分类数据集
+X, y = make_classification(n_samples=1000, n_features=4,
+n_informative=2, n_redundant=0,
+random_state=42)
+ # 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ # 创建随机森林分类器
+rf_classifier = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
+ # 训练模型
+rf_classifier.fit(X_train, y_train)
+ # 预测测试集
+y_pred = rf_classifier.predict(X_test)
+ # 计算准确率
+accuracy = accuracy_score(y_test, y_pred)
+print(f'准确率: {accuracy:.2f}')
+ # 计算F1分数
+f1 = f1_score(y_test, y_pred)
+print(f'F1分数: {f1:.2f}')
+
+# 可视化原始数据
+plt.figure(figsize=(10, 5))
+ # 绘制训练集数据
+plt.subplot(1, 2, 1)
+plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap='coolwarm', edgecolors='k', label='Train')
+plt.title('Training Data')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.legend()
+ # 绘制测试集数据
+plt.subplot(1, 2, 2)
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='coolwarm', edgecolors='k', label='Test')
+plt.title('Test Data')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.legend()
+plt.tight_layout()
+plt.show()
+ # 可视化预测结果
+plt.figure(figsize=(10, 5))
+ # 绘制测试集数据的真实标签
+plt.subplot(1, 2, 1)
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='coolwarm', edgecolors='k', label='True')
+plt.title('True Labels')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.legend()
+```
+#### KNN
+```python
+import numpy as np
+from sklearn.metrics import accuracy_score, f1_score, recall_score, confusion_matrix
+ # 数据集，其中前两列是x和y坐标，最后一列是标签（0代表红色，1代表蓝色）
+X = np.array([[1, 2], [2, 3], [3, 1], [6, 5], [7, 6], [8, 7]])
+y = np.array([0, 0, 0, 1, 1, 1])  # 标签数组
+# 新样本
+new_sample = np.array([4, 3])
+ # 选择K值
+k = 3
+ # 定义KNN分类器
+def knn(X, y, test_sample, k):
+# 计算测试样本与数据集中每个点的欧氏距离
+  distances = np.sqrt(np.sum((X - test_sample) ** 2, axis=1))
+# 找到K个最近邻居的索引
+  k_nearest_neighbors_idx = np.argsort(distances)[0:k]
+# 统计K个最近邻居的类别
+  k_nearest_neighbors_labels = y[k_nearest_neighbors_idx]
+ # 根据多数投票原则预测类别
+  predicted_label = np.argmax(np.bincount(k_nearest_neighbors_labels))
+  return predicted_label
+ # 预测新样本的类别
+predicted_label = knn(X, y, new_sample, k)
+ # 打印新样本的颜色
+print(f"新样本({new_sample[0]}, {new_sample[1]})的预测类别是：", "红色" if predicted_label == 0 else "蓝色")
+ # 为了计算评价指标，我们对整个数据集进行预测（实际应用中应该使用测试集）
+y_pred = np.array([knn(X, y, X[i], k) for i in range(len(X))])
+# 计算评价指标
+accuracy = accuracy_score(y, y_pred)
+f1 = f1_score(y, y_pred, average='binary')  # 因为是二分类问题，使用binary
+recall = recall_score(y, y_pred, average='binary')
+conf_matrix = confusion_matrix(y, y_pred)
+# 打印评价指标
+print(f'准确率: {accuracy:.2f}')
+print(f'F1分数: {f1:.2f}')
+print(f'召回率: {recall:.2f}')
+print('混淆矩阵:', conf_matrix)
+```
 ### 无监督分类
 #### k-means聚类
 ```python
