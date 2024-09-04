@@ -1,6 +1,9 @@
 # 数模代码汇总
+
 ## 分类
+
 ### 有监督分类
+
 #### SVM
 ```python
 import numpy as np
@@ -70,6 +73,7 @@ plt.ylim(yy.min(), yy.max())
 plt.title("2-Class classification (SVM)")
 plt.show()
 ```
+
 #### 随机森林
 ```python
 import matplotlib.pyplot as plt
@@ -124,6 +128,7 @@ plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.legend()
 ```
+
 #### KNN
 ```python
 import numpy as np
@@ -163,7 +168,9 @@ print(f'F1分数: {f1:.2f}')
 print(f'召回率: {recall:.2f}')
 print('混淆矩阵:', conf_matrix)
 ```
+
 ### 无监督分类
+
 #### k-means聚类
 ```python
 import numpy as np  
@@ -211,7 +218,75 @@ plt.grid(True)
 plt.show()
 ```
 ## 预测
+
+### 回归算法
+
+#### 偏最小二乘
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 生成随机数据
+np.random.seed(0)
+X = np.random.normal(size=(100, 10))  # 100个样本，10个特征的特征矩阵
+y = X @ np.random.normal(size=(10, 1)) + np.random.normal(size=(100, 1))  #乘上权重向量+噪声
+
+# 数据拆分成训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# 标准化特征
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# PLS回归模型拟合
+n_components = 3
+pls = PLSRegression(n_components=n_components)
+pls.fit(X_train_scaled, y_train)
+
+# 预测
+y_train_pred = pls.predict(X_train_scaled)
+y_test_pred = pls.predict(X_test_scaled)
+
+# 计算评价指标
+#R方评价和均方误差（mse）
+mse_train = mean_squared_error(y_train, y_train_pred)
+mse_test = mean_squared_error(y_test, y_test_pred)
+r2_train = r2_score(y_train, y_train_pred)
+r2_test = r2_score(y_test, y_test_pred)
+
+print(f'Training MSE: {mse_train:.3f}')
+print(f'Test MSE: {mse_test:.3f}')
+print(f'Training R^2: {r2_train:.3f}')
+print(f'Test R^2: {r2_test:.3f}')
+
+# 绘制结果
+plt.figure(figsize=(12, 6))
+
+plt.subplot(1, 2, 1)
+plt.scatter(y_train, y_train_pred, color='blue', edgecolor='k')
+plt.plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], '--', lw=2, color='red')
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Training set')
+
+plt.subplot(1, 2, 2)
+plt.scatter(y_test, y_test_pred, color='green', edgecolor='k')
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], '--', lw=2, color='red')
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Test set')
+
+plt.tight_layout()
+plt.show()
+```
+
 ### 时间序列预测
+
 #### LSTM
 ```python
 import numpy as np
@@ -325,6 +400,7 @@ plt.xlabel('时间')
 plt.ylabel('销售额（千克）')
 plt.show()
 ```
+
 #### ARIMA
 ```python
 import pandas as pd
@@ -479,6 +555,7 @@ plt.show()
 
 
 ```
+
 #### SARIMA
 ```python
 
@@ -670,7 +747,9 @@ plt.xticks(rotation=45)
 plt.legend()
 plt.show()
 ```
+
 ## 相关度分析
+
 ### perason相关系数
 ```python
 import pandas as pd
@@ -694,6 +773,7 @@ sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidt
 plt.title('Pearson Correlation Coefficient Heatmap')
 plt.show()
 ```
+
 ### spearman相关系数
 ```python
 import pandas as pd
@@ -718,7 +798,9 @@ plt.title('Pearson Correlation Coefficient Heatmap')
 plt.show()
 
 ```
+
 ## 评价决策类
+
 ### RSR熵权法TOPSIS
 ```python
 import numpy as np
