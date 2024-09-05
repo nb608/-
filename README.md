@@ -1,4 +1,114 @@
 # 数模代码汇总
+## 数据分析
+### 数据降维
+#### 主成分分析法（PCA）
+``` python
+from sklearn.decomposition import PCA
+import numpy as np
+X = np.array([[-1, 1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+pca = PCA(n_components=1)pca.fit(X)
+print(pca.transform(X))
+
+```
+### 数据集非线性关系分析
+```python
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import PolynomialFeatures
+
+# 生成示例数据
+np.random.seed(42)
+n_samples = 1000
+X = np.random.rand(n_samples, 2)
+y = 3*X[:, 0]**2 + 2*np.sin(2*np.pi*X[:, 1]) + np.random.normal(0, 0.1, n_samples)
+
+df = pd.DataFrame(X, columns=['X1', 'X2'])
+df['y'] = y
+
+# 1. 散点图矩阵
+plt.figure(figsize=(10, 8))
+sns.pairplot(df)
+plt.tight_layout()
+plt.show()
+
+# 2. 相关性热图
+plt.figure(figsize=(8, 6))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+plt.title('Correlation Heatmap')
+plt.show()
+
+# 3. 偏相关图
+plt.figure(figsize=(12, 4))
+for i, col in enumerate(['X1', 'X2']):
+    plt.subplot(1, 2, i+1)
+    sns.regplot(x=df[col], y=df['y'], lowess=True, scatter_kws={'alpha': 0.5})
+    plt.title(f'Partial Regression Plot: {col} vs y')
+plt.tight_layout()
+plt.show()
+
+# 4. 残差图分析
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = LinearRegression()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 2, 1)
+plt.scatter(y_pred, y_test - y_pred)
+plt.xlabel('Predicted values')
+plt.ylabel('Residuals')
+plt.title('Residual Plot')
+
+plt.subplot(1, 2, 2)
+sns.histplot(y_test - y_pred, kde=True)
+plt.xlabel('Residuals')
+plt.title('Residual Distribution')
+plt.tight_layout()
+plt.show()
+
+# 5. 非参数相关系数
+spearman_corr = df.corr(method='spearman')
+kendall_corr = df.corr(method='kendall')
+
+print("Spearman Correlation:")
+print(spearman_corr)
+print("\nKendall Correlation:")
+print(kendall_corr)
+
+# 6. 非线性回归模型比较
+X_poly = PolynomialFeatures(degree=2).fit_transform(X)
+X_train_poly, X_test_poly, y_train, y_test = train_test_split(X_poly, y, test_size=0.2, random_state=42)
+
+linear_model = LinearRegression()
+poly_model = LinearRegression()
+
+linear_model.fit(X_train, y_train)
+poly_model.fit(X_train_poly, y_train)
+
+linear_mse = mean_squared_error(y_test, linear_model.predict(X_test))
+poly_mse = mean_squared_error(y_test, poly_model.predict(X_test_poly))
+
+print(f"Linear Model MSE: {linear_mse}")
+print(f"Polynomial Model MSE: {poly_mse}")
+
+# 7. 特征交互可视化
+plt.figure(figsize=(10, 8))
+ax = plt.axes(projection='3d')
+ax.scatter3D(df['X1'], df['X2'], df['y'])
+ax.set_xlabel('X1')
+ax.set_ylabel('X2')
+ax.set_zlabel('y')
+plt.title('3D Scatter Plot: Feature Interaction')
+plt.show()
+
+```
 
 ## 分类
 
