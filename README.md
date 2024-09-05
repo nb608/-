@@ -1,7 +1,10 @@
 # 数模代码汇总
 ## 数据分析
+### 特征提取
 ### 数据降维
+
 #### 主成分分析法（PCA）
+要求：数据呈线性相关性（KPCA可以用于非线性）
 ``` python
 from sklearn.decomposition import PCA
 import numpy as np
