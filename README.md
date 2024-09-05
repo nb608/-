@@ -476,7 +476,24 @@ plt.show()
 ## 预测
 
 ### 回归算法
-
+#### BP神经网络回归
+```python
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation
+from keras.optimizers import Adam
+model = Sequential()  #层次模型
+model.add(Dense(16,input_dim=input_size,init='uniform')) #输入层，Dense表示BP层
+model.add(Activation('relu'))  #添加激活函数
+model.add(Dense(4,init='uniform')) #中间层
+model.add(Activation('relu'))  #添加激活函数
+model.add(Dense(1))  #输出层
+model.compile(loss='mean_squared_error', optimizer='Adam') #编译模型
+model.fit(X_train, y_train, nb_epoch = 50, batch_size = 256) #训练模型nb_epoch=50次
+y_train_predict=model.predict(X_train)
+y_train_predict=y_train_predict[:,0]
+y_test_predict=model.predict(X_test)
+y_test_predict=y_test_predict[:,0]
+```
 #### 偏最小二乘
 ```python
 import numpy as np
@@ -655,6 +672,25 @@ plt.title('预测与真实销售额')
 plt.xlabel('时间')
 plt.ylabel('销售额（千克）')
 plt.show()
+
+#另一种参数
+'''
+#建立LSTM模型 训练
+from keras.models import Sequential
+from keras.layers.core import Dense, Dropout, Activation
+from keras.layers.recurrent import LSTM
+#建立、训练模型过程
+d = 0.01
+model = Sequential()#建立层次模型
+model.add(LSTM(32, input_shape=(window, input_size), return_sequences=True))#建立LSTM层
+model.add(Dropout(d))#建立的遗忘层
+model.add(LSTM(16, input_shape=(window, input_size), return_sequences=False))#建立LSTM层
+model.add(Dropout(d))#建立的遗忘层
+model.add(Dense(2,init='uniform',activation='relu'))   #建立全连接层     
+model.add(Dense(1,init='uniform',activation='relu'))
+model.compile(loss='mse',optimizer='adam',metrics=['accuracy'])
+model.fit(X_train, y_train, nb_epoch =1000, batch_size = 256) #训练模型nb_epoch次
+'''
 ```
 
 #### ARIMA
