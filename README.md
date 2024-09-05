@@ -340,6 +340,7 @@ plt.show()
 ```
 #### R聚类（） 
 ##### DBSCAN（凸和非凸数据集）
+```python 
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
@@ -426,7 +427,7 @@ for k, col in zip(unique_labels, colors):
 ax2.set_title('估计的聚类数量: %d' % n_clusters_)
 plt.tight_layout()  # 调整子图间距
 plt.show()
-
+```
 ##### k-means聚类（凸数据集）
 ```python
 import numpy as np  
